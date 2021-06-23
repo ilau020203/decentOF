@@ -33,7 +33,7 @@ class App extends Component {
       console.log("sdfsdf")
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-     console.log(await web3.eth.getBlock("pending").gasLimit())
+    /// console.log(await web3.eth.getBlock("pending").gasLimit())
       const deployedNetwork = DecentOF.networks[networkId];
       const instance = new web3.eth.Contract(
         DecentOF.abi,
