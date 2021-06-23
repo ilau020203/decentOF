@@ -1,0 +1,24 @@
+.avatar{
+    border-radius: 100%;
+   
+    object-fit:cover;
+
+}
+.noneDerocation{
+    text-decoration: none;
+}
+NavLink .noneDerocation{
+    text-decoration: none;
+}
+.left{
+    flex: 1;
+    order:1;
+}
+.center{
+    flex: 1;
+    order:2;
+}
+.right{
+    flex: 1;
+    order:3;
+}
