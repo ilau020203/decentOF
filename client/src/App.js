@@ -11,6 +11,7 @@ import Subscriptions from "./components/Subscriptions"
 import "./App.css";
 import { BrowserRouter as Router,Switch,Route,NavLink,Redirect} from "react-router-dom";
 import { useHistory } from "react-router-dom";
+import {getIpfsHashFromBytes32,getBytes32FromIpfsHash} from "./utils/ipfsDecode"
 //import bootstrap from 'bootstrap'
 
 
@@ -20,7 +21,10 @@ const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' 
 
 
 class App extends Component {
-  
+  state={
+    'registration':true,
+  'notRegistration':false
+  }
   componentDidMount = async () => {
     try {
       // Get network provider and web3 instance.
@@ -44,14 +48,14 @@ class App extends Component {
       // example of interacting with the contract's methods.
       this.setState({ web3, account, contract: instance } );
       const registration = await instance.methods.isRegistrated().call({from:account});
-      
+      const notRegistration=!registration;
 
-      this.setState({ registration})
+      this.setState({ registration,notRegistration})
       if(registration){
           const myData =await instance.methods.getMyData().call({from:account});
           console.log(myData);
           let status= myData[0]
-          let avatar= myData[1]
+          let avatar= getIpfsHashFromBytes32(myData[1])
           let login= myData[2]
          
           let price= myData[4]
@@ -144,6 +148,8 @@ class App extends Component {
       if(error) {
          console.log("_________________")
         console.log(this.state.buffer)
+        console.log(result[0])
+
          console.log("_________________")
          console.log("_________________")
          console.log("_________________")
@@ -160,13 +166,15 @@ class App extends Component {
     })
     console.log(results)
       this.setState({ loading: true })
-      this.state.contract.methods.newPost(description,results.length,results).send({ from: this.state.account ,
-            gasLimit: this.state.web3.utils.toHex(7900000)}
-           ).on('transactionHash', (hash) => {
+      this.state.contract.methods.newPost(description,results.length,results.map(getBytes32FromIpfsHash)).send({ from: this.state.account 
+           
+      })
+      .on('transactionHash', (hash) => {
         this.setState({ loading: false })
       console.log("_________________")
 
       })
+      
    }
 
 
@@ -184,13 +192,12 @@ class App extends Component {
       console.log("_________________")
 
       this.setState({ loading: true })
-      this.state.contract.methods.registration(login,result[0].hash, Status,parseInt(Price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.contract.methods.registration(login,getBytes32FromIpfsHash(result[0].hash), Status,parseInt(Price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
       console.log("_________________")
-
+      window.location.reload();
       })
     })
-
   }
   constructor(props) {
     super(props)
@@ -215,7 +222,63 @@ class App extends Component {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
-    if(!this.state.registration){
+    if(!this.state.notRegistration){
+      return (
+      
+        <Router>
+          <Switch>
+        <div className="App">
+          <Header account={this.state.account} 
+          avatar={this.state.avatar}
+          login={this.state.login}
+          ></Header>
+           { this.state.loading
+           ? <div id="loader" className="text-center mt-5"><p>Loading...</p></div>
+           :<main >
+          <Redirect from="/registration" to="/home" />
+          <Route path="/home" render={() =>{
+           return( <Home 
+       
+           ></Home>)
+          }}></Route>
+  
+          <Route path="/home" render={() =>{
+           return( <Subscriptions 
+       
+           ></Subscriptions>)
+          }}></Route>
+          
+          <Route path="/Popular" render={() =>{
+           return( <Popular 
+       
+           ></Popular>)
+          }}></Route>
+           <Route path="/Profile" render={() =>{
+           return(
+              <Profile 
+              uploadPost={this.uploadPost}
+              captureFile={this.captureFile}
+             captureFiles={this.captureFiles}
+           ></Profile>)
+          }}></Route>
+          <Route path="/Subscriptions" render={() =>{
+           return( <Subscriptions 
+       
+           ></Subscriptions>)
+          }}></Route>
+  
+          </main>
+           }
+  
+           <Footer className="footer" ></Footer>
+        </div>
+        </Switch>
+        </Router>
+        
+      );
+    }else{
+ 
+    
       return(<Router> 
         <Redirect to="/registration" />
         <Route path="/registration" render={() =>{
@@ -231,62 +294,8 @@ class App extends Component {
       
       </Router>
       )
-    }
-    console.log(`https://ipfs.infura.io/ipfs/${this.state.avatar}`)
-    return (
-      
-      <Router>
-        <Switch>
-      <div className="App">
-        <Header account={this.state.account} 
-        avatar={this.state.avatar}
-        login={this.state.login}
-        ></Header>
-         { this.state.loading
-         ? <div id="loader" className="text-center mt-5"><p>Loading...</p></div>
-         :<main >
-        <Redirect from="/registration" to="/home" />
-        <Route path="/home" render={() =>{
-         return( <Home 
-     
-         ></Home>)
-        }}></Route>
-
-        <Route path="/home" render={() =>{
-         return( <Subscriptions 
-     
-         ></Subscriptions>)
-        }}></Route>
-        
-        <Route path="/Popular" render={() =>{
-         return( <Popular 
-     
-         ></Popular>)
-        }}></Route>
-         <Route path="/Profile" render={() =>{
-         return(
-            <Profile 
-            uploadPost={this.uploadPost}
-            captureFile={this.captureFile}
-           captureFiles={this.captureFiles}
-         ></Profile>)
-        }}></Route>
-        <Route path="/Subscriptions" render={() =>{
-         return( <Subscriptions 
-     
-         ></Subscriptions>)
-        }}></Route>
-
-        </main>
-         }
-
-         <Footer className="footer" ></Footer>
-      </div>
-      </Switch>
-      </Router>
-      
-    );
   }
+}
 }
 
 export default App;
