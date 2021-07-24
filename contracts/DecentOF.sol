@@ -1,38 +1,39 @@
 pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
-import "./library/stringUtils.sol";
 
 
 contract DecentOF{
-     using StringUtils for string;
-    string  name="DecentOF";
-    struct Post{
-        uint8 imageCount;
-        string[] hash;
+     
+    
+     string  name="DecentOF";
+     struct Post{
+        uint256  date;
+        bytes32[] hash;
+        // bytes32 hash;
         string description;
-        uint tipAmount;
+        uint8 imageCount;
         bool visibility;
-        uint256 date;
-        address payable author;
     }
     struct Subscribe{
         uint256 id;
         uint256 date;
         bool paid;
     }
+    function getTime()public view returns(uint256){
+         uint256 chainStartTime =uint256( block.timestamp);
+         return chainStartTime;
+    }
     struct Account{
         uint256 countPosts;
+        uint256 priceSubcribe;
+        bytes32 avatarHash;
         mapping(uint256=>Post) posts;
         mapping(uint64=>Subscribe) subscription;
-        uint64  countsSubscription;
         string login;
-        string avatarHash;
         string status;
-        uint256 subscribers;
         address payable author;
-        uint256 priceSubcribe;
-        uint256 date;
+        uint64  countsSubscription;
     }
     mapping(uint256=>Account) internal  accounts;
     uint256 internal accountsCount;
@@ -76,32 +77,49 @@ contract DecentOF{
          require(isRegistrated(),"users haven\'t account ,please register");
         _;
     }
-   
-   function getMyCountPost()
+    function getMyCountPost()
     _isRegistrated public
     view returns(uint256)
     {
         return accounts[findIdByAddress()].countPosts;
     }
-
     function getMyPostById(uint256 _index)
     _isRegistrated public
     view returns(uint8 ,
-        string[] memory,
+        bytes32[] memory,
         string memory,
         uint256 
         )
     {
         uint256 id =findIdByAddress();
         require(accounts[id].countPosts>_index);
-        uint8 imageCount = accounts[id].posts[_index].imageCount;
-        string[] memory hash = accounts[id].posts[_index].hash;
-        string memory  description = accounts[id].posts[_index].description;
-        uint256 date = accounts[id].posts[_index].date;
-        return(imageCount,hash,description,date);
+        Post storage post =accounts[id].posts[_index];
+        return(post.imageCount,post.hash,post.description,post.date);
     }
+    
+     function setVisiblePostById(uint256 _index)
+    _isRegistrated public
+    {
+        uint256 id =findIdByAddress();
+        require(accounts[id].countPosts>_index,"dont exist this post");
+        accounts[id].posts[_index].visibility=true;
+
+    }
+    
+    function setUnvisiblePostById(uint256 _index)
+    _isRegistrated public
+    {
+        uint256 id =findIdByAddress();
+        require(accounts[id].countPosts>_index,"dont exist this post");
+        accounts[id].posts[_index].visibility=true;
+
+    }
+   
+   
      function findIdByAddress() 
-     public view returns(uint256)
+     public _isRegistrated
+     view returns(uint256)
+     
      {
         for(uint256 i=0;i<accountsCount;i++){
             if(msg.sender==accounts[i].author){
@@ -110,11 +128,11 @@ contract DecentOF{
         }
         return uint256(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
     }
-    function registration(string memory _login,string memory _avatarHash,string memory _status,uint256 _priceSubcribe) 
+    function registration(string memory _login, bytes32 _avatarHash,string memory _status,uint256 _priceSubcribe) 
         public  
         {
         require(bytes(_login).length>0,"_login's length must be bigger than 0");
-        require(bytes(_avatarHash).length>0,"_avatarHash's length must be bigger than 0");
+        require((_avatarHash)!="","_avatarHash's length must be bigger than 0");
         require(bytes(_status).length>0,"_status's length must be bigger than 0");
         require(!isRegistrated(),"this user is register");
         
@@ -124,36 +142,36 @@ contract DecentOF{
         c.countPosts=0;
         c.status=_status;
         c.author=(msg.sender);
-        c.subscribers=0;
         c.priceSubcribe=_priceSubcribe;
+      
     }
-    function newPost(string memory _description,uint8 _imageCount,string[] memory _hash)
+    function newPost(string memory _description,uint8 _imageCount,bytes32[] memory   _hash)
     public  _isRegistrated 
     {
+        
         require(_imageCount==_hash.length,"_imageCount dont\'t equal _hash.length");
         uint256 id=findIdByAddress();
-        
         // console.log(accounts[findIdByAddress()])
-         
-        accounts[id].date=(uint256(block.timestamp));
+       
         Post storage c=accounts[id].posts[accounts[id].countPosts];
         accounts[id].countPosts++;
         c.description =_description;
         c.date=(uint256(block.timestamp));
         c.visibility=true;
-        c.author=(msg.sender);
         c.imageCount=_imageCount;
-        c.hash = new string[](_imageCount);
-        for(uint i =0;i<_imageCount;i++){
+       c.hash = new bytes32[](_imageCount);
+        // c.hash=_hash;
+        for(uint i = 0;i<_imageCount;i++){
             c.hash[i]=_hash[i];
         }
-        checkSubscription();
+      //  checkSubscription();
+    
     }
     
     function getMyData()  _isRegistrated
     public view returns(
         string memory,
-        string memory,
+       bytes32,
         string memory,
         address payable,
         uint256
@@ -161,7 +179,7 @@ contract DecentOF{
     {
         Account  storage  buf= accounts[findIdByAddress()];
         string memory login=buf.login;
-        string memory avatarHash=buf.avatarHash;
+        bytes32 avatarHash=buf.avatarHash;
         string memory status=buf.status;
         address payable author=buf.author;
         uint256 priceSubcribe=buf.priceSubcribe;
@@ -173,7 +191,7 @@ contract DecentOF{
     {
         accounts[findIdByAddress()].status=input;
     }
-    function setAvatarHash(string memory input)
+    function setAvatarHash(bytes32 input)
     public _isRegistrated
     {
         accounts[findIdByAddress()].avatarHash=input;
@@ -184,39 +202,20 @@ contract DecentOF{
         accounts[findIdByAddress()].login=input;
     }
     
-    //to do that
-    function getMyAllPosts(bool reverse )
-    public  _isRegistrated 
-    view returns(Post[] memory )  
-    {
-        uint256  id = findIdByAddress();
-        // require(accounts[id].countPosts!=0,"account haven't post")
-        Post[] memory memoryArray = new Post[](accounts[id].countPosts);
-        if(reverse){
-            for(uint256  i =  accounts[id].countPosts;i>0;i--){
-                memoryArray[accounts[id].countPosts-i] = accounts[id].posts[i-1];
-            }
-        }else{
-             for(uint256  i =0; i < accounts[id].countPosts; i++){
-                memoryArray[i] = accounts[id].posts[i];
-            }
-        }
-        return memoryArray;
-    }
     
     
     function getSubscriptions(uint64 _index)_isRegistrated public 
     view returns( string memory,
-        string memory,
+        bytes32,
         string memory,
        // address payable ,
         uint256 ,
-        uint256,
+       // uint256,
         bool
         )
     {
         string memory login;
-        string memory avatarHash;
+       bytes32 avatarHash;
         string memory status;
         {
         uint256  id=findIdByAddress();
@@ -228,13 +227,13 @@ contract DecentOF{
         }
         // address payable author=accounts[accounts[findIdByAddress()].subscription[_index].id].author;
         uint256 priceSubcribe=accounts[accounts[findIdByAddress()].subscription[_index].id].priceSubcribe;
-        uint256 subscribers=accounts[accounts[findIdByAddress()].subscription[_index].id].subscribers;
+       // uint256 subscribers=accounts[accounts[findIdByAddress()].subscription[_index].id].subscribers;
         bool paid=accounts[findIdByAddress()].subscription[_index].paid;
-        return(login,avatarHash,status,priceSubcribe,subscribers,paid);
+        return(login,avatarHash,status,priceSubcribe,paid);
     }
     
     
-    
+   /* 
     
     function getLoginFilterBySubcribe(uint8 _count, uint256 _subscribe)
     public
@@ -269,27 +268,27 @@ contract DecentOF{
         }
         return sum;
     }
-    
+    */
     function findIdByLogin(string memory _login)
     internal
     view returns(uint256)
     {
         for(uint256 i =0 ;i<accountsCount;i++){
-            if(accounts[i].login.equal(_login)){
+            if(keccak256(abi.encode(accounts[i].login))==keccak256(abi.encode(_login))){
                 return i;
             }
         }
         return uint256(0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
     }
     
-    function checkSubscription()
-    internal
+    function unsubscribe()
+    public
     {
         uint256 id = findIdByAddress();
         for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
-            if(accounts[id].date>accounts[id].subscription[i].date){
+            if((uint256(block.timestamp))>accounts[id].subscription[i].date){
                 accounts[id].subscription[i].paid=false;
-                accounts[accounts[id].subscription[i].id].subscribers--;
+               // accounts[accounts[id].subscription[i].id].subscribers--;
                 emit UnSubscribed(accounts[accounts[id].subscription[i].id].login);
             }
         }
@@ -299,7 +298,48 @@ contract DecentOF{
     view returns(uint64){
         return accounts[findIdByAddress()].countsSubscription;
     }
-    
+    function checkSubscription()
+    public view _isRegistrated
+    returns(bool)
+    {
+        uint256 id =findIdByAddress();
+        for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
+            if((uint256(block.timestamp))>accounts[id].subscription[i].date){
+                return false;
+            }
+        }
+        return true;
+    }
+    function getCountUnsubcribtion()
+    public view _isRegistrated
+    returns(uint64)
+    {  
+        uint256 id = findIdByAddress();
+        uint64 j=0;
+        for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
+            if((uint256(block.timestamp))>accounts[id].subscription[i].date){
+                
+                j++;
+            }
+        }
+        return j;
+    }
+    function getIdUnsubscriptionByNumber(uint64 _number)
+    public view _isRegistrated
+    returns(uint64)
+    {
+        uint256 id =findIdByAddress();
+        uint64 j=0;
+        for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
+            if((uint256(block.timestamp))>accounts[id].subscription[i].date){
+                if(_number==j)  {
+                    return i;
+                }
+                j++;
+            }
+        }
+       require(true,"bad _number");
+    }
     function getSubscriptionCountPostByIdUser(uint64 _idUser)
     public _isRegistrated 
     view returns(
@@ -314,37 +354,44 @@ contract DecentOF{
     public _isRegistrated 
     view returns(
         uint8 ,
-        string[] memory,
+        bytes32[] memory,
         string memory,
         uint256
         )
     {
         
         uint256 id=findIdByAddress();
-     //   require(_idUser<accounts[id].countsSubscription,"don\'t exist post");//to do this require
+        require(_idUser<accounts[id].countsSubscription,"don\'t exist user");
         require(_idPost<accounts[accounts[id].subscription[_idUser].id].countPosts,"don\'t exist post ");
-        
+        if(accounts[accounts[id].subscription[_idUser].id].posts[_idPost].visibility){
         uint8 imageCount = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].imageCount;
-        string[] memory hash = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].hash;
+        bytes32[] memory hash = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].hash;
         string memory  description = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].description;
         uint256 date = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].date;
         return(imageCount,hash,description,date);
+        }else{
+            bytes32[] memory hash = new bytes32[](1);
+            string memory  description ="post delete";
+            uint256 date = accounts[accounts[id].subscription[_idUser].id].posts[_idPost].date;
+            return(0,hash,description,date);
+        }
     }
     function subscribe(string memory _login,uint8 _count)
     public payable _isRegistrated _loginIsUsed(_login)
     {
-        uint256 _date=uint256(block.timestamp);
+        
         require(_count>0,"_count must be bigger 0");
-        require(msg.value>=accounts[findIdByLogin(_login)].priceSubcribe*uint256(_count),"need more money");
+       
+        require((msg.value) >=(accounts[findIdByLogin(_login)].priceSubcribe*uint256(_count) ),"need more money");
         uint256 subscriberId =findIdByAddress();
         uint256 id=findIdByLogin(_login);
         
         require(id!=subscriberId,"subscribe on myself is not accepted");
         accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription].id=id;
         accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription].paid=true;
-        accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription++].date=_date+30*24*60*60*_count;
-        accounts[subscriberId].date=_date;
-        accounts[id].subscribers++;
+        accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription++].date=(uint256(block.timestamp))+30*24*60*60*_count;
+     
+        //accounts[id].subscribers++;
         accounts[id].author.transfer(msg.value);
         emit Subscribed(accounts[id].login);
         checkSubscription();

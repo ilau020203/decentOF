@@ -1,10 +1,9 @@
-var StringUtils = artifacts.require("StringUtils");
-var decentOF = artifacts.require("decentOF");
+
+var decentOF = artifacts.require("DecentOF");
 
 
 module.exports = function (deployer) {
- deployer.deploy(StringUtils);
-  deployer.link(StringUtils, decentOF);
+
   deployer.deploy(decentOF)
     
 };

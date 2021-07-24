@@ -6,9 +6,13 @@ module.exports = {
   contracts_build_directory: path.join(__dirname, "client/src/contracts"),
   networks: {
     develop: {
-      gas: "6721975",
-      port: 8545
-
-    }
+      gas: 500000,
+      port: 7545
+    },
+    // "customNetwork": {
+    //   network_id: 1,
+    //   host: "127.0.0.1",
+    //   port: 9546 // the port that Ganache-cli exposes
+    // }
   }
 };
