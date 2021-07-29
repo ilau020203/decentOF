@@ -11,7 +11,7 @@ class Registration extends Component {
          <div className={s.form_signin}>
         <form onSubmit={(event) => {
                 event.preventDefault()
-                this.props.registrate(this.Login.value,this.Status.value,this.Price.value)
+                this.props.registrate(this.Status.value,this.Login.value,this.Price.value)
                 
                 }}>
 
