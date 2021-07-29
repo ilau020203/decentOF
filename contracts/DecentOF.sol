@@ -1,5 +1,5 @@
 pragma solidity 0.5.16;
-pragma experimental ABIEncoderV2;
+
 
 
 
@@ -27,6 +27,7 @@ contract DecentOF{
     struct Account{
         uint256 countPosts;
         uint256 priceSubcribe;
+        uint256 subscribers;
         bytes32 avatarHash;
         mapping(uint256=>Post) posts;
         mapping(uint64=>Subscribe) subscription;
@@ -173,18 +174,29 @@ contract DecentOF{
         string memory,
        bytes32,
         string memory,
-        address payable,
+        uint256,
         uint256
         ) 
     {
         Account  storage  buf= accounts[findIdByAddress()];
-        string memory login=buf.login;
-        bytes32 avatarHash=buf.avatarHash;
-        string memory status=buf.status;
-        address payable author=buf.author;
-        uint256 priceSubcribe=buf.priceSubcribe;
-        return (login,avatarHash,status,author,priceSubcribe);
+      
+        return (buf.login,buf.avatarHash,buf.status,buf.priceSubcribe,buf.subscribers);
     }
+    
+    function getDataByLogin(string memory _login)  
+    public view returns(
+        string memory,
+       bytes32,
+        string memory,
+        uint256,
+        uint256
+        ) 
+    {
+        Account  storage  buf= accounts[findIdByLogin(_login)];
+      
+        return (buf.login,buf.avatarHash,buf.status,buf.priceSubcribe,buf.subscribers);
+    }
+    
     
     function setStatus(string memory input)
     public _isRegistrated
@@ -201,7 +213,12 @@ contract DecentOF{
     {
         accounts[findIdByAddress()].login=input;
     }
-    
+
+    function setPriceSubcribe(uint256 input)
+    public _isRegistrated 
+    {
+        accounts[findIdByAddress()].priceSubcribe=input;
+    }
     
     
     function getSubscriptions(uint64 _index)_isRegistrated public 
@@ -210,7 +227,7 @@ contract DecentOF{
         string memory,
        // address payable ,
         uint256 ,
-       // uint256,
+        uint256,
         bool
         )
     {
@@ -227,32 +244,31 @@ contract DecentOF{
         }
         // address payable author=accounts[accounts[findIdByAddress()].subscription[_index].id].author;
         uint256 priceSubcribe=accounts[accounts[findIdByAddress()].subscription[_index].id].priceSubcribe;
-       // uint256 subscribers=accounts[accounts[findIdByAddress()].subscription[_index].id].subscribers;
+        uint256 subscribers=accounts[accounts[findIdByAddress()].subscription[_index].id].subscribers;
         bool paid=accounts[findIdByAddress()].subscription[_index].paid;
-        return(login,avatarHash,status,priceSubcribe,paid);
+        return(login,avatarHash,status,priceSubcribe,subscribers,paid);
     }
     
     
-   /* 
+ 
     
-    function getLoginFilterBySubcribe(uint8 _count, uint256 _subscribe)
+    function getLoginFilterBySubcribe(uint256 _id, uint256 _subscribe)
     public
     view returns(
-    string[] memory
+    string memory
     )
     {
-        uint8 j=0;
-        string[] memory memoryArray= new string[]( getCountAccountBySubcribe( _subscribe));
+        uint256 j=0;
+       
         for(uint256 i = 0 ;i<accountsCount;i++){
             if(accounts[i].subscribers>=_subscribe){
-                memoryArray[j++]=accounts[i].login;
-                if( _count<j ){
-                    return memoryArray;
-                }
+               if(j++==_id){
+                   return accounts[i].login;
+               }
             }
             
         }
-        return memoryArray;
+        
     }
   
     function getCountAccountBySubcribe( uint256 _subscribe)
@@ -268,7 +284,7 @@ contract DecentOF{
         }
         return sum;
     }
-    */
+  
     function findIdByLogin(string memory _login)
     internal
     view returns(uint256)
@@ -288,7 +304,7 @@ contract DecentOF{
         for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
             if((uint256(block.timestamp))>accounts[id].subscription[i].date){
                 accounts[id].subscription[i].paid=false;
-               // accounts[accounts[id].subscription[i].id].subscribers--;
+                accounts[accounts[id].subscription[i].id].subscribers--;
                 emit UnSubscribed(accounts[accounts[id].subscription[i].id].login);
             }
         }
@@ -391,7 +407,7 @@ contract DecentOF{
         accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription].paid=true;
         accounts[subscriberId].subscription[accounts[subscriberId].countsSubscription++].date=(uint256(block.timestamp))+30*24*60*60*_count;
      
-        //accounts[id].subscribers++;
+        accounts[id].subscribers++;
         accounts[id].author.transfer(msg.value);
         emit Subscribed(accounts[id].login);
         checkSubscription();

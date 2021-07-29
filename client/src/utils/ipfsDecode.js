@@ -3,6 +3,9 @@ import bs58 from 'bs58'
 
 
 function getBytes32FromIpfsHash(ipfsListing){
+  console.log(typeof(ipfsListing))
+  console.log((ipfsListing))
+
   return "0x"+bs58.decode(ipfsListing).slice(2).toString('hex')
 }
 

@@ -169,7 +169,7 @@ contract('DecentOF',acccounts => {
       //assert.equal(await decent_of.getCountSubscriptions.call({from:acccounts[2]}),1,'subscribe is correct')
     })
     it('get posts', async ()=>{
-      let count= await decent_of.getSubscriptionCountPostByIdUser(0,{from:acccounts[2]})
+      let count = await decent_of.getSubscriptionCountPostByIdUser(0,{from:acccounts[2]})
        assert.equal(count,1,'count post is correct')
        let output= await decent_of.getSubscriptionPostByIdUser(0,0,{from: acccounts[2]})
 
