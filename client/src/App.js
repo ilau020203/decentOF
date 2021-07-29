@@ -5,17 +5,19 @@ import Header from "./components/Header"
 import Registration from "./components/Registration"
 import Footer from "./components/Footer"
 import Profile from "./components/Profile"
+import Edit from "./components/Edit"
 import Popular from "./components/Popular"
 import Home from "./components/Home"
 import Subscriptions from "./components/Subscriptions"
 import "./App.css";
 import { BrowserRouter as Router,Switch,Route,NavLink,Redirect} from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import {getIpfsHashFromBytes32,getBytes32FromIpfsHash} from "./utils/ipfsDecode"
+import {getBytes32FromIpfsHash,getIpfsHashFromBytes32} from "./utils/ipfsDecode"
+
 //import bootstrap from 'bootstrap'
 
 
-
+const BigNumber = require('bignumber.js');
 const ipfsClient = require('ipfs-http-client')
 const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
 
@@ -27,6 +29,7 @@ class App extends Component {
   }
   componentDidMount = async () => {
     try {
+
       // Get network provider and web3 instance.
       const web3 = await getWeb3();
 
@@ -49,24 +52,21 @@ class App extends Component {
       this.setState({ web3, account, contract: instance } );
       const registration = await instance.methods.isRegistrated().call({from:account});
       const notRegistration=!registration;
-
+      
       this.setState({ registration,notRegistration})
       if(registration){
           const myData =await instance.methods.getMyData().call({from:account});
           console.log(myData);
-          let status= myData[0]
-          let avatar= getIpfsHashFromBytes32(myData[1])
-          let login= myData[2]
-         
-          let price= myData[4]
-          console.log(avatar)
-          this.setState({status,avatar,login,price})
+          let status= myData[2]
+          let avatar= "https://ipfs.infura.io/ipfs/"+getIpfsHashFromBytes32(myData[1])
+          let login= myData[0]
+         console.log(login)
+          let price= myData[3]
+          let subscribers=myData[4]
+          console.log(subscribers)
+          this.setState({status,avatar,login,price,subscribers})
           this.setState({ loading: true })
-    // this.state.contract.methods.subscribe('ilau',1).send({ from: this.state.account, value: this.state.web3.utils.toWei('5', 'Ether') }).estimateGas({gas: 5000000}, function(error, gasAmount){
-    // if(gasAmount == 5000000)
-    //     console.log('Method ran out of gas');
-// });
-
+ 
       }else{
 
        
@@ -89,13 +89,13 @@ class App extends Component {
 
     event.preventDefault()
     const file = event.target.files[0]
-    console.log(event.target.files)
+
     const reader = new window.FileReader()
     reader.readAsArrayBuffer(file)
 
     reader.onloadend = () => {
       this.setState({ buffer: Buffer(reader.result) })
-      console.log('buffer', this.state.buffer)
+  
     }
   }
 
@@ -103,17 +103,15 @@ class App extends Component {
 
     event.preventDefault()
     let buf=[];
-    console.log("this") 
+
     this.setState({buffer: [] })
     Object.entries(event.target.files).forEach(([key, value]) =>{
       
-      console.log(1)
+
       const reader = new window.FileReader()
        reader.readAsArrayBuffer(value)
        let result = reader.onloadend = () => {
-      console.log("thisdsssss")
-         
-      console.log('buffer', Buffer(reader.result) )
+      
 
       
       buf.push( Buffer(reader.result))
@@ -121,15 +119,12 @@ class App extends Component {
       
 
     }
-    console.log(buf)
+
     this.setState({buffer:buf})
-    console.log('resultууа')
+
    
     })
-    
-    
-    
-   
+
   }
   tipImageOwner(id, tipAmount) {
     this.setState({ loading: true })
@@ -137,51 +132,87 @@ class App extends Component {
       this.setState({ loading: false })
     })
   }
-   uploadPost = description=>{
+
+
+     uploadPost = description=>{
         console.log("Submitting file to ipfs...")
 
     //adding file to the IPFS
     let results=[];
-
-    this.state.buffer.map(value=>{ipfs.add(this.state.buffer, (error, result) => {
+    let res;
+    console.log(this.state.buffer)
+    ipfs.add(this.state.buffer, (error, result) => {
       console.log('Ipfs result', result)
       if(error) {
-         console.log("_________________")
-        console.log(this.state.buffer)
-        console.log(result[0])
-
-         console.log("_________________")
-         console.log("_________________")
-         console.log("_________________")
         console.error(error)
         alert("ipfs")
         return
       }
-      results.push(result[0].hash)
-      console.log(result[0].hash)
+      result=result.map(value=>{
+        return getBytes32FromIpfsHash(value.path)
+      })
 
-
-  
-    })
-    })
-    console.log(results)
       this.setState({ loading: true })
-      this.state.contract.methods.newPost(description,results.length,results.map(getBytes32FromIpfsHash)).send({ from: this.state.account 
-           
-      })
-      .on('transactionHash', (hash) => {
+      this.state.contract.methods.newPost(description,result.length,result).send({ from: this.state.account }
+           ).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      console.log("_________________")
-
       })
+    })
+   
+  }
+
+ async getMyPosts(){
+   try {
+     
+     const count= await this.state.contract.methods.getMyCountPost().call({from:this.state.account});
+    let out=[];
+    for(let i=count-1 ;i>=0;i--){
       
+      out.push(await this.state.contract.methods.getMyPostById(i).call({from:this.state.account}))
+      
+    }
+    return out;
+   } catch (error) {
+     console.log(error)
+   }
+ }
+   async  getMyCountPosts(){
+   try {
+     return await this.state.contract.methods.getMyCountPost().call({from:this.state.account});
+   } catch (error) {
+     console.log(error)
+   }
+   }
+    async getMyPostsById(id){
+    try {
+      return await this.state.contract.methods.getMyPostById(id).call({from:this.state.account});
+    } catch (error) {
+     console.log(error)
+    }
    }
 
 
+  setLogin(login){
+    this.setState({ loading: true })
+      this.state.contract.methods.setLogin(login).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      window.location.reload();})
+  }
+  setStatus(status){
+    this.setState({ loading: true })
+      this.state.contract.methods.setStatus(status).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      window.location.reload();})
+  }
 
-  registrate = (Status,login,Price)=>{
-    console.log("Submitting file to ipfs...")
-
+  setPrice(price){
+    this.setState({ loading: true })
+      this.state.contract.methods.setPriceSubcribe(parseInt(price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      window.location.reload();})
+  }
+  setAvatarHash(){
+     console.log("Submitting file to ipfs...")
     //adding file to the IPFS
     ipfs.add(this.state.buffer, (error, result) => {
       console.log('Ipfs result', result)
@@ -189,12 +220,35 @@ class App extends Component {
         console.error(error)
         return
       }
-      console.log("_________________")
-
       this.setState({ loading: true })
-      this.state.contract.methods.registration(login,getBytes32FromIpfsHash(result[0].hash), Status,parseInt(Price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.contract.methods.setAvatarHash(getBytes32FromIpfsHash(result[0].hash)).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      console.log("_________________")
+      window.location.reload();
+      })
+    })
+  }
+  search = (Login)=>{
+      this.setState({ loading: true })
+      this.setState({searchLogin:Login})
+      this.setState({ loading: false })
+  }
+  redirect =()=>{
+    let x=this.state.searchLogin;
+    this.state.searchLogin=null;
+    return (<Redirect to={"users/" + x} />)
+  }
+  registrate = (Status,Login,Price)=>{
+    console.log("Submitting file to ipfs...")
+    //adding file to the IPFS
+    ipfs.add(this.state.buffer, (error, result) => {
+      console.log('Ipfs result', result)
+      if(error) {
+        console.error(error)
+        return
+      }
+      this.setState({ loading: true })
+      this.state.contract.methods.registration(Login,getBytes32FromIpfsHash(result[0].hash), Status,parseInt(Price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
       window.location.reload();
       })
     })
@@ -208,12 +262,24 @@ class App extends Component {
       images: [],
       loading: true 
     }
+    const windowInnerWidth = document.documentElement.clientWidth
+    const windowInnerHeight = document.documentElement.clientHeight
+    this.setState({windowInnerHeight,windowInnerWidth})
     this.captureFiles=this.captureFiles.bind(this)
     this.uploadPost=this.uploadPost.bind(this)
     this.registrate=this.registrate.bind(this)
    // this.uploadImage = this.uploadImage.bind(this)
     //this.tipImageOwner = this.tipImageOwner.bind(this)
     this.captureFile = this.captureFile.bind(this)
+    this.getMyPosts=this.getMyPosts.bind(this)
+    this.getMyCountPosts=this.getMyCountPosts.bind(this)
+    this.getMyPostsById=this.getMyPostsById.bind(this)
+    this.setAvatarHash=this.setAvatarHash.bind(this)
+    this.setPrice=this.setPrice.bind(this)
+    this.setStatus=this.setStatus.bind(this)
+    this.setLogin=this.setLogin.bind(this)
+    this.search=this.search.bind(this)
+    this.redirect=this.redirect.bind(this)
   }
   
   render() {
@@ -226,50 +292,83 @@ class App extends Component {
       return (
       
         <Router>
+
+           
           <Switch>
         <div className="App">
-          <Header account={this.state.account} 
+      
+          <Header 
           avatar={this.state.avatar}
           login={this.state.login}
+          search={this.search}
           ></Header>
+          
            { this.state.loading
            ? <div id="loader" className="text-center mt-5"><p>Loading...</p></div>
+           :this.state.searchLogin
+           ? <main >
+          { 
+              this.redirect()
+           }
+           </main >
            :<main >
-          <Redirect from="/registration" to="/home" />
-          <Route path="/home" render={() =>{
+          
+          <Route path="/home" render={(routeProps) =>{
            return( <Home 
-       
+            routeProps={routeProps}
            ></Home>)
           }}></Route>
-  
+           <Route path="/Edit" render={() =>{
+               return( <Edit 
+                  setAvatarHash={this.setAvatarHash}
+                  captureFile={this.captureFile}
+                  setPrice={this.setPrice}
+                  setStatus={this.setStatus}
+                  setLogin={this.setLogin}
+                  login={this.state.login}
+                  status={this.state.status}
+                  ptice={this.state.ptice}
+                  avatar={this.state.avatar}
+
+              ></Edit>)
+          }}></Route>
           <Route path="/home" render={() =>{
            return( <Subscriptions 
-       
+    
            ></Subscriptions>)
           }}></Route>
           
           <Route path="/Popular" render={() =>{
            return( <Popular 
-       
+            
            ></Popular>)
           }}></Route>
            <Route path="/Profile" render={() =>{
            return(
               <Profile 
+              getMyCountPosts={this.getMyCountPosts}
+              getMyPostsById={this.getMyPostsById}
               uploadPost={this.uploadPost}
               captureFile={this.captureFile}
-             captureFiles={this.captureFiles}
+              captureFiles={this.captureFiles}
+              getMyPosts={this.getMyPosts}
+              avatar={this.state.avatar}
+              login={this.state.login}
+              status={this.state.status}
+              price={this.state.price}
+              subscribers={this.state.subscribers}
            ></Profile>)
           }}></Route>
           <Route path="/Subscriptions" render={() =>{
            return( <Subscriptions 
-       
+           
            ></Subscriptions>)
           }}></Route>
-  
+          <Route exact path="/registration" component={()=>{return(<Redirect  to="/home" />)}} />
+          <Route exact path="/" component={()=>{return(<Redirect  to="/home" />)}} />
           </main>
            }
-  
+
            <Footer className="footer" ></Footer>
         </div>
         </Switch>
@@ -277,8 +376,6 @@ class App extends Component {
         
       );
     }else{
- 
-    
       return(<Router> 
         <Redirect to="/registration" />
         <Route path="/registration" render={() =>{
@@ -288,7 +385,6 @@ class App extends Component {
          
          ></Registration>)
         }}>
-
         </Route>
         
       
