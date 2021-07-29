@@ -7,15 +7,15 @@ class NewPost extends Component {
 
   render() {
     return (
-       <div>
-            <div className="content mr-auto ml-auto"></div>
+       <div align="">
+            <div  className="content  mr-auto ml-auto"></div>
             <p>&nbsp;</p>
-              <h2>Share Image</h2>
+              <h2>New Post</h2>
               <form onSubmit={(event) => {
                 event.preventDefault()
                 const description = this.imageDescription.value
-                console.log(this.props.u)
                 this.props.uploadPost(description)
+                this.props.update()
               }} encType="multipart/form-data">
 
                 <input type='file'multiple="multiple" accept=".jpg, .jpeg, .png, .bmp, .gif" onChange={this.props.captureFiles} />
@@ -29,7 +29,7 @@ class NewPost extends Component {
                         placeholder="Image description..."
                         required />
                   </div>
-                <button type="submit" class="btn btn-primary btn-block btn-lg">Upload!</button>
+                <button type="submit" class="btn mt-2 btn-primary btn-block btn-lg">Upload!</button>
               </form>
               </div>
     );
