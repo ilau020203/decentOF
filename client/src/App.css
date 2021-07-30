@@ -1,19 +1,34 @@
+*{
+  background-color: #f5f5f5 no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 .App {
   text-align: center;
   background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
+  overflow:  hidden
 }
 .header{
+  background-color:  #212529;
   flex: 1;
   order:1
 }
 main{
   padding-top: 5rem;
   flex:1;
-  order:2
+  order:2;
+  width:100%;
+  height:100%;
+  overflow:hidden;
 }
+
 .footer{
   flex:1;
   order: 3;
+  
 }

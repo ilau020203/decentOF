@@ -6,6 +6,7 @@ import s from './Home.module.css'
 class Home extends Component {
 
   render() {
+    console.log(this.props.routeProps)
     return (
         <div>
             Bootstrap Icons

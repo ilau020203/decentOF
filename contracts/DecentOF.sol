@@ -168,7 +168,30 @@ contract DecentOF{
       //  checkSubscription();
     
     }
-    
+     function isSubucriberByLogin(string memory _login)
+    public view _isRegistrated
+    returns(bool)
+    {  
+        uint256 id = findIdByAddress();
+        
+        for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
+            if((keccak256(abi.encode(accounts[accounts[id].subscription[i].id].login))==keccak256(abi.encode(_login)))&&(((uint256(block.timestamp))<accounts[id].subscription[i].date)))
+                return true;
+        }
+        return false;
+    }
+    function getIdByLogin(string memory _login)
+    public view _isRegistrated
+    returns(uint64)
+    {  
+        uint256 id = findIdByAddress();
+        
+        for(uint64 i = 0;i< accounts[id].countsSubscription;i++){
+            if((keccak256(abi.encode(accounts[accounts[id].subscription[i].id].login))==keccak256(abi.encode(_login)))&&(((uint256(block.timestamp))<accounts[id].subscription[i].date)))
+                return i;
+        }
+       return uint64(0xFFFFFFFFFFFFFFFF);
+    }
     function getMyData()  _isRegistrated
     public view returns(
         string memory,
@@ -196,8 +219,6 @@ contract DecentOF{
       
         return (buf.login,buf.avatarHash,buf.status,buf.priceSubcribe,buf.subscribers);
     }
-    
-    
     function setStatus(string memory input)
     public _isRegistrated
     {

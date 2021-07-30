@@ -5,6 +5,7 @@ import Header from "./components/Header"
 import Registration from "./components/Registration"
 import Footer from "./components/Footer"
 import Profile from "./components/Profile"
+import UserPage from "./components/UserPage"
 import Edit from "./components/Edit"
 import Popular from "./components/Popular"
 import Home from "./components/Home"
@@ -138,8 +139,7 @@ class App extends Component {
         console.log("Submitting file to ipfs...")
 
     //adding file to the IPFS
-    let results=[];
-    let res;
+  
     console.log(this.state.buffer)
     ipfs.add(this.state.buffer, (error, result) => {
       console.log('Ipfs result', result)
@@ -160,7 +160,38 @@ class App extends Component {
     })
    
   }
-
+  async getIsSubscribe(login){
+    return await this.state.contract.methods.isSubucriberByLogin(login).call({from:this.state.account});
+  }
+  async getData(login){
+    try {
+      const data= await this.state.contract.methods.getDataByLogin(login).call({from:this.state.account});
+      let out={
+        'login': data[0],
+        'avatar': "https://ipfs.infura.io/ipfs/"+getIpfsHashFromBytes32(data[1]),
+        'status': data[2],
+        'price':data[3],
+        'subscribers':data[4]
+      }
+      return out;
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async getPosts(login){
+    try {
+      
+      const id= await this.state.contract.methods.getIdByLogin(login).call({from:this.state.account});
+      const count= await this.state.contract.methods.getSubscriptionCountPostByIdUser(id).call({from:this.state.account});
+     let out=[];
+     for(let i=count-1 ;i>=0;i--){
+       out.push(await this.state.contract.methods.getSubscriptionPostByIdUser(id,i).call({from:this.state.account}))
+     }
+     return out;
+    } catch (error) {
+      console.log(error)
+    }
+  }
  async getMyPosts(){
    try {
      
@@ -191,7 +222,12 @@ class App extends Component {
     }
    }
 
-
+ subscribe(login,value,count=1){
+  this.setState({ loading: true })
+  this.state.contract.methods.subscribe(login,count).send({value:value, from: this.state.account }).on('transactionHash', (hash) => {
+    this.setState({ loading: false })
+  window.location.reload();})
+ }
   setLogin(login){
     this.setState({ loading: true })
       this.state.contract.methods.setLogin(login).send({ from: this.state.account }).on('transactionHash', (hash) => {
@@ -235,7 +271,7 @@ class App extends Component {
   redirect =()=>{
     let x=this.state.searchLogin;
     this.state.searchLogin=null;
-    return (<Redirect to={"users/" + x} />)
+    return (<Redirect from="users/" to={"users/" + x} />)
   }
   registrate = (Status,Login,Price)=>{
     console.log("Submitting file to ipfs...")
@@ -268,8 +304,6 @@ class App extends Component {
     this.captureFiles=this.captureFiles.bind(this)
     this.uploadPost=this.uploadPost.bind(this)
     this.registrate=this.registrate.bind(this)
-   // this.uploadImage = this.uploadImage.bind(this)
-    //this.tipImageOwner = this.tipImageOwner.bind(this)
     this.captureFile = this.captureFile.bind(this)
     this.getMyPosts=this.getMyPosts.bind(this)
     this.getMyCountPosts=this.getMyCountPosts.bind(this)
@@ -280,6 +314,10 @@ class App extends Component {
     this.setLogin=this.setLogin.bind(this)
     this.search=this.search.bind(this)
     this.redirect=this.redirect.bind(this)
+    this.getIsSubscribe=this.getIsSubscribe.bind(this)
+    this.subscribe=this.subscribe.bind(this)
+    this.getData=this.getData.bind(this)
+    this.getPosts=this.getPosts.bind(this)
   }
   
   render() {
@@ -307,12 +345,26 @@ class App extends Component {
            ? <div id="loader" className="text-center mt-5"><p>Loading...</p></div>
            :this.state.searchLogin
            ? <main >
+             <Route  path="/users" component={()=>{
+               return(<Redirect  to="../" />)}}></Route>
           { 
               this.redirect()
+          }
+          {
+              this.setState({searchLogin:false})
            }
            </main >
            :<main >
-          
+            <Route path="/users/" render={(routeProps) =>{
+           return( <UserPage
+            routeProps={routeProps}
+            getData={this.getData}
+            subscribe={this.subscribe}
+            getPosts={this.getPosts}
+            getIsSubscribe={this.getIsSubscribe}
+            login={this.state.login}
+           ></UserPage>)
+          }}></Route>
           <Route path="/home" render={(routeProps) =>{
            return( <Home 
             routeProps={routeProps}
@@ -369,7 +421,7 @@ class App extends Component {
           </main>
            }
 
-           <Footer className="footer" ></Footer>
+           {/* <Footer className="footer" ></Footer> */}
         </div>
         </Switch>
         </Router>

@@ -1,19 +1,33 @@
 import React,  { useRef,useEffect,useLayoutEffect, useState , Component } from 'react';
 import {getBytes32FromIpfsHash,getIpfsHashFromBytes32} from "../utils/ipfsDecode"
-import MyProfile from './MyProfile'
+import UserProfile from './UserProfile'
 import NewPost from './NewPost';
 import Post from './Post'
 import 'bootstrap/dist/css/bootstrap.css'
-import s from './Profile.module.css'
+import s from './UserPage.module.css'
 import InfiniteScroll from "react-infinite-scroll-component";
-
+import { matchPath } from "react-router";
+import { Redirect} from "react-router-dom";
   
- const  Profile=props=>{
+ const  UserPage=props=>{
   const targetRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 0, heigth: 0 });
   const [posts,setPosts]= useState( [])
   const [updatePost,setUpdatePost]=useState(true)
   const [hasMoretPosts,setHasMorePosts]=useState(true)
+  const [isSubscribe,setIsSubscribe]=useState(false)
+  const [data,setData]=useState(null)
+ 
+  const { match, location, history } = props.routeProps;
+  
+  console.log(location.pathname)
+  const login = matchPath(location.pathname, {
+    path: "/users/:login",
+    exact: true,
+    strict: false
+  }).params.login;
+  
+  
   // const getPosts=null
 
   // async function getMorePost(){
@@ -45,12 +59,42 @@ import InfiniteScroll from "react-infinite-scroll-component";
   //    console.log(getPosts);
   // }, [updatePost])
   useEffect(() => {
-    
-    async function getMyPosts() {
-        const posts =await props.getMyPosts();
-         setPosts(posts);
-     }
-     getMyPosts();
+    async function getPosts() {
+      console.log(login)
+      const posts =await props.getPosts(login);
+      setPosts(posts);
+      console.log("getPosts")
+   }
+   if(isSubscribe){
+      console.log("this")
+      getPosts();
+    }
+    return () => {
+      
+    }
+  }, [isSubscribe])
+  useEffect(() => {
+
+    async function getData(){
+      console.log(login)
+      const data = await props.getData(login);
+      
+      setData(data);
+      console.log(data)
+      console.log("getData")
+      
+    }
+
+    async function getIsSubscribe(){
+      console.log(login)
+      const isSubscribe = await props.getIsSubscribe(login)
+      setIsSubscribe(isSubscribe);
+      console.log(isSubscribe)
+    }
+     getData()
+     getIsSubscribe()
+     console.log("this__")
+     console.log(isSubscribe)
      
   
     return () => {
@@ -72,7 +116,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
   // the number of ms the window size must stay the same size before the
   // dimension state variable is reset
   const RESET_TIMEOUT = 100;
-
+  
   const test_dimensions = () => {
     // For some reason targetRef.current.getBoundingClientRect was not available
     // I found this worked for me, but unfortunately I can't find the
@@ -100,28 +144,29 @@ import InfiniteScroll from "react-infinite-scroll-component";
     clearInterval(movement_timer);
     movement_timer = setTimeout(test_dimensions, RESET_TIMEOUT);
   });
+  console.log(data)
    return (
           <div ref={targetRef } className=" container posts-content col-lg-6" align="center">
-           <MyProfile
-           login={props.login}
-           status={props.status}
-           avatar={props.avatar }
-           subscribers={props.subscribers}
-           price={props.price}
+           { data!=null
+            ?<div>{data.login!=""
+            ?<div>{login!=props.login
+            ?
+            <div>
+           <UserProfile
+           login={data.login}
+           status={data.status}
+           avatar={data.avatar }
+           subscribers={data.subscribers}
+           price={data.price}
+           isSubscribe={isSubscribe}
+           subscribe={props.subscribe}
            >
              
-           </MyProfile>
+           </UserProfile>
          
-          <NewPost
-          uploadPost={props.uploadPost}
-          update={update}
-          captureFile={props.captureFile}
-          captureFiles={props.captureFiles}
-          >
-           </NewPost>
+         
 
-
-{/* 
+          {/* 
            <InfiniteScroll
           dataLength={posts.length}
           next={getPosts}
@@ -133,9 +178,13 @@ import InfiniteScroll from "react-infinite-scroll-component";
             <p style={{ textAlign: "center" }}>
               <b>Yay! You have seen it all</b>
             </p>
-          }
-        > */}
-          { 
+         }
+             > */}
+          { !isSubscribe
+          ?<div>
+            for see post need subscribe
+          </div>
+          :<div>{
             posts.map(post=>{
               
               return( 
@@ -145,14 +194,16 @@ import InfiniteScroll from "react-infinite-scroll-component";
                 return 'https://ipfs.infura.io/ipfs/'+getIpfsHashFromBytes32(byets)
                 }
               )}
-              avatar={props.avatar}
+              avatar={data.avatar}
               description={post[2]}
-              login={props.login}
+              login={data.login}
               width={ dimensions.width-60} 
               date={post[3]*1000}
               ></Post>
               )
             })
+            }
+            </div>
            }
            {/* </InfiniteScroll> */}
           
@@ -160,8 +211,22 @@ import InfiniteScroll from "react-infinite-scroll-component";
          
          
     
+      </div>
+      :<Redirect  to="/Profile" />
+      }</div>
+      :<div>
+      <div id="loader" className="text-center mt-5"><p>Not found account {login}</p></div>
     </div>
-   
+    
+    }</div>
+    
+    :
+    <div>
+      <div id="loader" className="text-center mt-5"><p>Not found account {login}</p></div>
+    </div>
+ }
+    </div>
+    
           
 
      
@@ -169,4 +234,4 @@ import InfiniteScroll from "react-infinite-scroll-component";
   
 }
 
-export default Profile;
+export default UserPage;

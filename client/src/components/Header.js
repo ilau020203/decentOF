@@ -8,25 +8,34 @@ import { BrowserRouter as Router,Switch,Route,NavLink,Link} from "react-router-d
 class Header extends Component {
 
   render() {
+  console.log( s)
     return (
-      <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+      <nav className={"navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow "+s.all}>
         <NavLink to="/home"
-          className="navbar-brand col-sm-3 col-md-2 mr-0"
+          className={"navbar-brand col-sm-3 col-md-2 mr-0 "+s.all}
          
         >
           <img src={photo} width="30" height="30" className="d-inline-block align-top" alt="" />
           DecentOF
         </NavLink>
-        <div class="container">
-    <header class="d-flex justify-content-center py-3">
-      <ul class="nav nav-pills">
-        <li className="nav-item"><NavLink to="/home" className="nav-link" activeClassName="active" aria-current="page">Home</NavLink></li>
-        <li className="nav-item"><NavLink to="/Subscriptions" className="nav-link" activeClassName="active">Subscriptions</NavLink></li>
+        <div className={"container "+s.all}>
+    <div className={"d-flex justify-content-center py-3 "+s.all}>
+      <ul className={"nav nav-pills "+s.all}>
+        <li className="nav-item"><NavLink to="/home" className={"nav-link "+s.all} activeClassName="active" aria-current="page">Home</NavLink></li>
+        <li className="nav-item"><NavLink to="/Subscriptions" className={"nav-link "+s.all} activeClassName="active">Subscriptions</NavLink></li>
         <li className="nav-item"><NavLink to="/Popular" className="nav-link"  activeClassName="active">Popular</NavLink></li>
         <li className="nav-item"><NavLink to="/Profile" className="nav-link" activeClassName="active">Profile</NavLink></li>
       </ul>
-    </header>
+    </div>
   </div>
+   <form className="d-flex" onSubmit={(event) => {
+                event.preventDefault()
+                const login = this.login.value
+                this.props.search(login);
+              }}>
+        <input className={s.search+"  mx-0 me-2"} ref={(input) => { this.login = input }} type="search" placeholder="Search" aria-label="Search"></input>
+        <button className="btn btn-outline-success" type="submit">Search</button>
+    </form>
   <NavLink to="/Profile" className= {s.noneDerocation}>
         <ul className="navbar-nav px-2">
         
@@ -41,7 +50,7 @@ class Header extends Component {
                 className={'ml-2 '+s.avatar}
                 height='40'
                
-                src={`https://ipfs.infura.io/ipfs/${this.props.avatar}`}
+                src={this.props.avatar}
               ></img>
           </li>
          
