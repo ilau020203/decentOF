@@ -146,12 +146,12 @@ import { Redirect} from "react-router-dom";
   });
   console.log(data)
    return (
-          <div ref={targetRef } className=" container posts-content col-lg-6" align="center">
+          <div ref={targetRef } className=" container justify-content-center  col-lg-6" align="center">
            { data!=null
             ?<div>{data.login!=""
             ?<div>{login!=props.login
             ?
-            <div>
+            <>
            <UserProfile
            login={data.login}
            status={data.status}
@@ -182,7 +182,25 @@ import { Redirect} from "react-router-dom";
              > */}
           { !isSubscribe
           ?<div>
+            <br></br>
             for see post need subscribe
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
+            <br></br>
           </div>
           :<div>{
             posts.map(post=>{
@@ -211,7 +229,7 @@ import { Redirect} from "react-router-dom";
          
          
     
-      </div>
+      </>
       :<Redirect  to="/Profile" />
       }</div>
       :<div>

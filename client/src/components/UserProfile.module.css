@@ -1,13 +1,13 @@
 .border{
     width:100%;
-    float:left;
+    float:center;
     background-color: #B3E5FC;
     border-radius: 10px
 }
 
 .card {
     
-    float:left;
+   
     border: none;
     border-radius: 10px;
     background-color: #fff
@@ -43,4 +43,10 @@
 
 .number3 {
     font-weight: 500
+}
+.image{
+    object-fit: cover;
+    width:10rem;
+    height: 10rem;
+    border-radius:50%;
 }

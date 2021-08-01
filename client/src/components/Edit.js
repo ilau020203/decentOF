@@ -1,71 +1,89 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.css'
 import s from './Edit.module.css'
 
-class Edit extends Component {
+const Edit =props=>{
 
-  render() {
+  let Status,Login,Price;
     return (     
       <div className={s.main}>
       <div className={s.form_signin}>
-     <h1 className="h3 mb-3 fw-normal">Editor your page</h1>
-     <form onSubmit={(event) => {
+     <h1 className="h3   mb-3 fw-normal">Editor your profile</h1>
+     <div className="align-self-start row">
+     <form className="col" onSubmit={(event) => {
              event.preventDefault()
-             this.props.setLogin(this.Login.value)
+             props.setAvatarHash()
              
              }}>
-        <div className="form-floating">
-            <input type="login" className="form-control" id="floatingInput" placeholder={this.props.login} ref={(input) => { this.Login = input }}></input>
-            <label htmlFor="floatingInput">Login</label>
-        </div>
-     <button className="w-100 btn btn-lg btn-primary" type="submit">save</button>
+    
+     <img className={s.image} src = {props.avatar} width="100%"></img>
+     <div className="row p-1 ps-0 " >
+     <div className={"input-group mb-3 col"+s.inputFile}>
+     <input type="file" className="form-control" size="40" onChange={props.captureFile}></input>
+     </div>
+     <button className={"w-100 btn btn-sm btn-primary col mb-3 pb-1"+s.button}  type="submit">save</button>
+     </div>
    </form>
 
-    
-    <form onSubmit={(event) => {
+
+
+    <div className="col">
+    <form className="col" onSubmit={(event) => {
              event.preventDefault()
-             this.props.setAvatarHash()
+             props.setLogin(Login.value)
              
              }}>
-     <label htmlFor="avatar" className="form-label">Avatar Image</label>
-     <img src = {this.props.avatar} width="100%"></img>
-     <div className="input-group mb-3">
-     <input type="file" className="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" onChange={this.props.captureFile}></input>
+        <div className="row p-1 ps-0">
+        <div className={"form-floating col "+s.input}>
+        <div className="input-group mb-3">
+        <span className="input-group-text">Login</span>
+            <input type="login" className="form-control" id="floatingInput" placeholder={props.login} ref={(input) => { Login = input }}></input>
+        </div>
+        </div>
+
+     <button className="w-100 btn btn-sm btn-primary col mb-3 pb-1" type="submit">save</button>
      </div>
-     <button className="w-100 btn btn-lg btn-primary" type="submit">save</button>
    </form>
+    
 
 
 
    <form onSubmit={(event) => {
              event.preventDefault()
-             this.props.setPrice(this.Price.value)
+             props.setPrice(Price.value)
 
              }}>
-       <label htmlFor="avatar" className="form-label">Price your subscribe</label>
-     <div className="input-group mb-3">
-      <span className="input-group-text">eth</span>
-     <input type="number" className="form-control" placeholder={this.props.price} ref={(input) => { this.Price = input }}  aria-label="Amount (to the nearest eth)"></input>
+      <div className="row p-1 ps-0">
+       
+     <div className={"input-group mb-3 col "+s.input}>
+      <span className="input-group-text">ether</span>
+     <input type="number" step="any" className="form-control" placeholder={props.price} ref={(input) => { Price = input }}  aria-label="Amount (to the nearest eth)"></input>
      </div>
     
-     <button className="w-100 btn btn-lg btn-primary" type="submit">save</button>
+     <button className="w-100 btn btn-sm btn-primary col mb-3 pb-1" type="submit">save</button>
+     </div>
    </form>
 
      <form onSubmit={(event) => {
              event.preventDefault()
-             this.props.setStatus(this.Status.value)
+             props.setStatus(Status.value)
              
              }}>
-     <div className="input-group mb-3">
+      <div className="row p-1 ps-0">
+     <div className={"input-group mb-3 col "+s.input}>
+
      <span className="input-group-text" id="inputGroup-sizing-default">Status</span>
-     <input type="text" className="form-control" placeholder={this.props.status}  ref={(input) => { this.Status = input }}  aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" ></input>
+     
+     <input type="text" className="form-control" placeholder={props.status}  ref={(input) => { Status = input }}  aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" ></input>
      </div>
-     <button className="w-100 btn btn-lg btn-primary" type="submit">save</button>
+     
+     <button className={"w-100 btn btn-sm btn-primary col mb-3 pb-1 "} type="submit">save</button>
+     </div>
    </form>
 
-
- 
+   </div>
+   </div>
    </div>
 
    
@@ -74,7 +92,7 @@ class Edit extends Component {
   
 
     );
-  }
+  
 }
 
 export default Edit;

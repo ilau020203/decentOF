@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.css'
 import s from './NewPost.module.css'
 
-class NewPost extends Component {
+const NewPost =props=> {
 
-  render() {
+    let imageDescription;
     return (
        <div align="">
             <div  className="content  mr-auto ml-auto"></div>
@@ -13,18 +13,18 @@ class NewPost extends Component {
               <h2>New Post</h2>
               <form onSubmit={(event) => {
                 event.preventDefault()
-                const description = this.imageDescription.value
-                this.props.uploadPost(description)
-                this.props.update()
+                const description = imageDescription.value
+                props.uploadPost(description)
+                props.update()
               }} encType="multipart/form-data">
 
-                <input type='file'multiple="multiple" accept=".jpg, .jpeg, .png, .bmp, .gif" onChange={this.props.captureFiles} />
+                <input type='file'multiple="multiple" accept=".jpg, .jpeg, .png, .bmp, .gif" onChange={props.captureFiles} />
                   <div className="form-group mr-sm-2">
                     <br></br>
                       <input
                         id="imageDescription"
                         type="text"
-                        ref={(input) => { this.imageDescription = input }}
+                        ref={(input) => {imageDescription = input }}
                         className="form-control"
                         placeholder="Image description..."
                         required />
@@ -33,7 +33,7 @@ class NewPost extends Component {
               </form>
               </div>
     );
-  }
+  
 }
 
 export default NewPost;

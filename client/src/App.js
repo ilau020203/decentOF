@@ -221,12 +221,40 @@ class App extends Component {
      console.log(error)
     }
    }
+   async getSubscriptions(){
+    try {
+      
+      const count= await this.state.contract.methods.getCountSubscriptions().call({from:this.state.account});
+      console.log(count)
+     let out=[];
+     for(let i=count-1 ;i>=0;i--){
+       let array=await this.state.contract.methods.getSubscriptions(i).call({from:this.state.account})
+       let buf={
+          login:array[0],
+          avatar:"https://ipfs.infura.io/ipfs/"+getIpfsHashFromBytes32(array[1]),
+          status:array[2],
+          price:array[3],
+          subscribers:array[4],
+          paid:array[5]
+       }
+       out.push(buf)
+     }
+     console.log(out)
+     return out;
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
  subscribe(login,value,count=1){
   this.setState({ loading: true })
   this.state.contract.methods.subscribe(login,count).send({value:value, from: this.state.account }).on('transactionHash', (hash) => {
     this.setState({ loading: false })
-  window.location.reload();})
+ 
+}).then((result) => {
+    console.log(result)
+    window.location.reload();
+  })
  }
   setLogin(login){
     this.setState({ loading: true })
@@ -243,7 +271,7 @@ class App extends Component {
 
   setPrice(price){
     this.setState({ loading: true })
-      this.state.contract.methods.setPriceSubcribe(parseInt(price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.contract.methods.setPriceSubcribe(this.state.web3.utils.toWei(price, 'ether')) .send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
       window.location.reload();})
   }
@@ -283,7 +311,7 @@ class App extends Component {
         return
       }
       this.setState({ loading: true })
-      this.state.contract.methods.registration(Login,getBytes32FromIpfsHash(result[0].hash), Status,parseInt(Price)).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.contract.methods.registration(Login,getBytes32FromIpfsHash(result[0].hash), Status,this.state.web3.utils.toWei(Price,'ether')).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
       window.location.reload();
       })
@@ -318,10 +346,10 @@ class App extends Component {
     this.subscribe=this.subscribe.bind(this)
     this.getData=this.getData.bind(this)
     this.getPosts=this.getPosts.bind(this)
+    this.getSubscriptions=this.getSubscriptions.bind(this)
   }
   
   render() {
-   
 
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -385,9 +413,9 @@ class App extends Component {
               ></Edit>)
           }}></Route>
           <Route path="/home" render={() =>{
-           return( <Subscriptions 
+           return( <Home 
     
-           ></Subscriptions>)
+           ></Home>)
           }}></Route>
           
           <Route path="/Popular" render={() =>{
@@ -413,7 +441,7 @@ class App extends Component {
           }}></Route>
           <Route path="/Subscriptions" render={() =>{
            return( <Subscriptions 
-           
+                getSubscriptions={this.getSubscriptions}
            ></Subscriptions>)
           }}></Route>
           <Route exact path="/registration" component={()=>{return(<Redirect  to="/home" />)}} />

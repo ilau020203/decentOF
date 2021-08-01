@@ -7,12 +7,10 @@ class Popular extends Component {
 
   render() {
     return (
-        
         <div className="container">
             we are doing this
           <span className="text-muted"></span>
         </div>
-     
     );
   }
 }

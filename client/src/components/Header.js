@@ -5,10 +5,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 import s from './Header.module.css'
 import { BrowserRouter as Router,Switch,Route,NavLink,Link} from "react-router-dom";
 
-class Header extends Component {
+const Header =props=>{
 
-  render() {
-  console.log( s)
+    let login;
     return (
       <nav className={"navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow "+s.all}>
         <NavLink to="/home"
@@ -30,10 +29,9 @@ class Header extends Component {
   </div>
    <form className="d-flex" onSubmit={(event) => {
                 event.preventDefault()
-                const login = this.login.value
-                this.props.search(login);
+                props.search(login.value);
               }}>
-        <input className={s.search+"  mx-0 me-2"} ref={(input) => { this.login = input }} type="search" placeholder="Search" aria-label="Search"></input>
+        <input className={s.search+"  mx-0 me-2"} ref={(input) => { login = input }} type="search" placeholder="Search" aria-label="Search"></input>
         <button className="btn btn-outline-success" type="submit">Search</button>
     </form>
   <NavLink to="/Profile" className= {s.noneDerocation}>
@@ -41,7 +39,7 @@ class Header extends Component {
         
           <li className="nav-item text-nowrap ">
             <small className={"text-secondary "+s.noneDerocation}>
-             {this.props.login}&nbsp;&nbsp;
+             {props.login}&nbsp;&nbsp;
             </small>
             
             <img
@@ -49,8 +47,8 @@ class Header extends Component {
 
                 className={'ml-2 '+s.avatar}
                 height='40'
-               
-                src={this.props.avatar}
+                width='40'
+                src={props.avatar}
               ></img>
           </li>
          
@@ -58,7 +56,7 @@ class Header extends Component {
         </NavLink>
       </nav>
     );
-  }
+  
 }
 
 export default Header;

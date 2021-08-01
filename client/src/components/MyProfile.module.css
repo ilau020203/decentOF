@@ -6,7 +6,6 @@
 }
 
 .card {
-    
     float:left;
     border: none;
     border-radius: 10px;
@@ -22,7 +21,12 @@
     font-size: 1rem;
     color: #a1aab9
 }
-
+.image{
+    object-fit: cover;
+    width:10rem;
+    height: 10rem;
+    border-radius:50%;
+}
 .number1 {
     font-weight: 500
 }
@@ -37,7 +41,7 @@
 }
 
 .rating {
-    font-size: 10px;
+    font-size: 1rem;
     color: #a1aab9
 }
 

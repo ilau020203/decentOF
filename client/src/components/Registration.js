@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import s from './Registration.module.css'
 import 'bootstrap/dist/css/bootstrap.css'
 
-class Registration extends Component {
+const Registration =props=>{
 
-  render() {
+    let Status,Login,Price;
     return (
       
       <div className={s.main}>
          <div className={s.form_signin}>
         <form onSubmit={(event) => {
                 event.preventDefault()
-                this.props.registrate(this.Status.value,this.Login.value,this.Price.value)
+                props.registrate(Status.value,Login.value,Price.value)
                 
                 }}>
 
@@ -23,7 +23,7 @@ class Registration extends Component {
         <h1 className="h3 mb-3 fw-normal">Please sign up</h1>
     
         <div className="form-floating">
-          <input type="login" className="form-control" id="floatingInput" placeholder="Login"ref={(input) => { this.Login = input }}></input>
+          <input type="login" className="form-control" id="floatingInput" placeholder="Login"ref={(input) => { Login = input }}></input>
           <label htmlFor="floatingInput">Login</label>
         </div>
         
@@ -34,11 +34,11 @@ class Registration extends Component {
           <label htmlFor="avatar" className="form-label">Price your subscribe</label>
         <div className="input-group mb-3">
          <span className="input-group-text">eth</span>
-        <input type="number" className="form-control" ref={(input) => { this.Price = input }}  aria-label="Amount (to the nearest eth)"></input>
+        <input type="number" className="form-control" ref={(input) => { Price = input }}  aria-label="Amount (to the nearest eth)"></input>
         </div>
         <div className="input-group mb-3">
         <span className="input-group-text" id="inputGroup-sizing-default">Status</span>
-        <input type="text" className="form-control"  ref={(input) => { this.Status = input }}  aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" ></input>
+        <input type="text" className="form-control"  ref={(input) => { Status = input }}  aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" ></input>
         </div>
         <button className="w-100 btn btn-lg btn-primary" type="submit">Sign up</button>
         
@@ -56,7 +56,7 @@ class Registration extends Component {
      
 
     );
-  }
+  
 }
 
 export default Registration;
