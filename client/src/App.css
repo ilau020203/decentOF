@@ -39,6 +39,9 @@ smallAvatar{
   border-radius:50%;
 }
 
+body{
+  background-color: #f5f5f5;
+}
 bigAvatar{
 
   object-fit: cover;
