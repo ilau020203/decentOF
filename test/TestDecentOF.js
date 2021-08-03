@@ -113,13 +113,11 @@ contract('DecentOF',acccounts => {
       let login = (output[0]);
       let hash =getIpfsHashFromBytes32(( output[1]));
       let status = output[2];
-      let address = output[3];
-      let price = BigNumber(output[4]);
+      let price = BigNumber(output[3]);
      
       assert.equal(dataAcccounts[1].avatarHash, hash, 'hash is correct')
       assert.equal(dataAcccounts[1].login, login, 'login is correct')
       assert.equal(dataAcccounts[1].status, status, 'status is correct')
-      assert.equal(acccounts[1], address, 'address is correct')
       assert.equal(dataAcccounts[1].price, price, 'price is correct')
     })
     //need more test

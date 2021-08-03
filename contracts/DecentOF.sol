@@ -255,43 +255,15 @@ contract DecentOF{
         string memory login;
        bytes32 avatarHash;
         string memory status;
-        {
         uint256  id=findIdByAddress();
         require(_index<accounts[id].countsSubscription,
         "id subscription bigger than count subscription");
-        login=accounts[accounts[id].subscription[_index].id].login;
-        avatarHash=accounts[accounts[id].subscription[_index].id].avatarHash;
-        status=accounts[accounts[id].subscription[_index].id].status;
-        }
-        // address payable author=accounts[accounts[findIdByAddress()].subscription[_index].id].author;
-        uint256 priceSubcribe=accounts[accounts[findIdByAddress()].subscription[_index].id].priceSubcribe;
-        uint256 subscribers=accounts[accounts[findIdByAddress()].subscription[_index].id].subscribers;
+        Account  storage  buf=accounts[accounts[id].subscription[_index].id];
         bool paid=accounts[findIdByAddress()].subscription[_index].paid;
-        return(login,avatarHash,status,priceSubcribe,subscribers,paid);
+        return(buf.login,buf.avatarHash,buf.status,buf.priceSubcribe,buf.subscribers,paid);
     }
-    
-    
  
     
-    function getLoginFilterBySubcribe(uint256 _id, uint256 _subscribe)
-    public
-    view returns(
-    string memory
-    )
-    {
-        uint256 j=0;
-       
-        for(uint256 i = 0 ;i<accountsCount;i++){
-            if(accounts[i].subscribers>=_subscribe){
-               if(j++==_id){
-                   return accounts[i].login;
-               }
-            }
-            
-        }
-        
-    }
-  
     function getCountAccountBySubcribe( uint256 _subscribe)
     public
     view returns(uint256)
@@ -305,7 +277,25 @@ contract DecentOF{
         }
         return sum;
     }
-  
+    function getLoginFilterBySubcribe(uint256 _id, uint256 _subscribe)
+    public
+    view returns(
+    string memory
+    )
+    {
+        require(getCountAccountBySubcribe( _subscribe)>_id,"dont exist usert");
+        uint256 j=0;
+       
+        for(uint256 i = 0 ;i<accountsCount;i++){
+            if(accounts[i].subscribers>=_subscribe){
+               if(j++==_id){
+                   return accounts[i].login;
+               }
+            }
+            
+        }
+        
+    }
     function findIdByLogin(string memory _login)
     internal
     view returns(uint256)
@@ -375,7 +365,7 @@ contract DecentOF{
                 j++;
             }
         }
-       require(true,"bad _number");
+       assert(true,"bad _number");
     }
     function getSubscriptionCountPostByIdUser(uint64 _idUser)
     public _isRegistrated 
