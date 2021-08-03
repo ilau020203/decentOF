@@ -37,11 +37,10 @@ class App extends Component {
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
       const account = accounts[0];
-      console.log(accounts)
-      console.log("sdfsdf")
+      
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-    /// console.log(await web3.eth.getBlock("pending").gasLimit())
+   
       const deployedNetwork = DecentOF.networks[networkId];
       const instance = new web3.eth.Contract(
         DecentOF.abi,
@@ -57,17 +56,15 @@ class App extends Component {
       this.setState({ registration,notRegistration})
       if(registration){
           const myData =await instance.methods.getMyData().call({from:account});
-          console.log(myData);
           let status= myData[2]
           let avatar= "https://ipfs.infura.io/ipfs/"+getIpfsHashFromBytes32(myData[1])
           let login= myData[0]
-         console.log(login)
           let price= myData[3]
           let subscribers=myData[4]
-          console.log(subscribers)
           this.setState({status,avatar,login,price,subscribers})
           this.setState({ loading: true })
- 
+          
+
       }else{
 
        
@@ -112,13 +109,7 @@ class App extends Component {
       const reader = new window.FileReader()
        reader.readAsArrayBuffer(value)
        let result = reader.onloadend = () => {
-      
-
-      
       buf.push( Buffer(reader.result))
-      console.log('result', this.state.buffer )
-      
-
     }
 
     this.setState({buffer:buf})
@@ -160,18 +151,216 @@ class App extends Component {
     })
    
   }
+
+  
+   createGet10NewPosts(){
+    
+   let itartionHomePosts =0;
+   let postsHome=[];
+   let max1Home=0;
+   let max1HomeIndex=0;
+   let  max2Home=0;
+   let max2HomeIndex=0;
+   let start=false;
+  return async()=> {
+    
+    let out=[]
+   
+    const countSubscriptions = await   this.state.contract.methods.getCountSubscriptions().call({from:this.state.account});
+     
+    if(!!countSubscriptions){
+     
+    if(!postsHome.length){
+       
+    for(let i =0;i<countSubscriptions;i++)
+    {
+
+      if(i<postsHome.length+1){
+      let count=await this.state.contract.methods.getSubscriptionCountPostByIdUser(i).call({from:this.state.account});
+     
+      
+      if(count>0){
+     
+      let object = await this.state.contract.methods.getSubscriptionPostByIdUser(i,count-1).call({from:this.state.account})
+      let item={object,count}
+      
+      postsHome.push(item)
+     
+      }else{
+       postsHome.push({
+         'count': 0 ,
+         'object': [0,0,0,-1]
+       })
+      }
+     
+    }
+      if(postsHome[postsHome.length-1].object[3]>max1Home){
+        max1HomeIndex=i;
+        max1Home=postsHome[postsHome.length-1].object[3]
+      }else if(postsHome[postsHome.length-1].object[3]>max2Home){
+        max2HomeIndex=i;
+        max2Home=postsHome[postsHome.length-1].object[3]
+      }
+    }
+  }
+ 
+    while(out.length<10){
+      
+      if(max1Home>0){
+     
+      
+      let data = await  this.state.contract.methods.getSubscriptions(max1HomeIndex).call({from:this.state.account})  //getSubscriptions
+      out.push( {
+          'images':postsHome[max1HomeIndex].object[1].map((byets)=>{
+                return 'https://ipfs.infura.io/ipfs/'+getIpfsHashFromBytes32(byets)
+                }),
+          'description':postsHome[max1HomeIndex].object[2],
+          'date':postsHome[max1HomeIndex].object[3],
+          'avatar':'https://ipfs.infura.io/ipfs/'+getIpfsHashFromBytes32(data[1]),
+          'login':data[0]
+        })
+        postsHome[max1HomeIndex].count--;
+        if(postsHome[max1HomeIndex].count>0){
+          
+         
+         
+          postsHome[max1HomeIndex].object= await  this.state.contract.methods.getSubscriptionPostByIdUser(max1HomeIndex,postsHome[max1HomeIndex].count-1).call({from:this.state.account})
+           if(postsHome[max1HomeIndex].object[3]>max2Home){
+            max1Home=postsHome[max1HomeIndex].object[3];
+            continue;
+           }else
+           {
+              let t=max1HomeIndex;
+              max1Home=max2Home;
+              
+              max1HomeIndex=max2HomeIndex;
+              
+              max2Home=postsHome[t].object[3];
+              max2HomeIndex=t;
+              
+              
+              for(let i=0;i<countSubscriptions;i++){
+              
+                if((postsHome[i].object[3]>max2Home)&&(i!=max1HomeIndex)){
+                  max2Home=postsHome[i].object[3]
+                  max2HomeIndex=i
+                  
+                }
+              }
+           }
+        }else{
+          
+        postsHome[max1HomeIndex].object= [0,0,0,-1]
+        
+        
+        max2Home=0;
+          max1Home=0;
+        for(let i=0;i<countSubscriptions;i++){
+          if(postsHome[i].object[3]>max1Home){
+            max1HomeIndex=i
+            
+
+            max1Home=postsHome[i].object[3]
+          }else if(postsHome[i].object[3]>max2Home){
+            max2HomeIndex=i
+            max2Home=postsHome[i].object[3]
+            }
+        }
+      }
+      }
+      else if(max2Home>0){
+        
+        let data = await  this.state.contract.methods.getSubscriptions(max2HomeIndex).call({from:this.state.account})  //getSubscriptions
+      
+        out.push( {
+            'images':postsHome[max2HomeIndex].object[1].map((byets)=>{
+                  return 'https://ipfs.infura.io/ipfs/'+getIpfsHashFromBytes32(byets)
+                  }),
+            'description':postsHome[max2HomeIndex].object[2],
+            'date':postsHome[max2HomeIndex].object[3],
+            'avatar':data[1],
+            'login':data[0]
+          })
+          postsHome[max2HomeIndex].count--;
+          if(postsHome[max2HomeIndex].count>0){
+          postsHome[max2HomeIndex].object= await  this.state.contract.methods.getSubscriptionPostByIdUser(max2HomeIndex,postsHome[max2HomeIndex].count-1).call({from:this.state.account})
+          
+          
+          max2Home=0;
+          max1Home=0;
+          for(let i=0;i<countSubscriptions;i++){
+            if(postsHome[i].object[3]>max1Home){
+
+              max1HomeIndex=i
+              max1Home=postsHome[i].object[3]
+            }else if(postsHome[i].object[3]>max2Home){
+              max2HomeIndex=i
+              max2Home=postsHome[i].object[3]
+              }
+          }
+        }else{
+          postsHome[max2HomeIndex].object= [0,0,0,-1]
+          max2Home=0;
+          max1Home=0;
+          for(let i=0;i<countSubscriptions;i++){
+            if(postsHome[i].object[3]>max1Home){
+              max1HomeIndex=i
+
+              max1Home=postsHome[i].object[3]
+            }else if(postsHome[i].object[3]>max2Home){
+              max2HomeIndex=i
+              max2Home=postsHome[i].object[3]
+              }
+          }
+        }
+      }
+      else return out;
+    }
+    itartionHomePosts++;
+    return out;
+  } return out;
+  }
+  }
+
+   createGet10TopPopularAccount(){
+    let i=0;
+    return async()=>{
+      i++;
+      let subscribers=0;
+      let out=[];
+      let count= await this.state.contract.methods.getCountAccountBySubcribe(subscribers).call({from:this.state.account});
+      if((i-1)*10>=count){
+        return out;
+      }
+      
+      while(count>=i*10){
+         let count= await this.state.contract.methods.getCountAccountBySubcribe(Math.ceil(Math.exp(++subscribers))).call({from:this.state.account});
+      }
+      for(let i = count-1;i>=0;i--){
+        let login=await this.state.contract.methods.getLoginFilterBySubcribe(i,Math.ceil(Math.exp(subscribers))).call({from:this.state.account});
+        out.push(await this.getData(login))
+      }
+      return out;
+
+    }
+
+  }
   async getIsSubscribe(login){
     return await this.state.contract.methods.isSubucriberByLogin(login).call({from:this.state.account});
   }
   async getData(login){
     try {
       const data= await this.state.contract.methods.getDataByLogin(login).call({from:this.state.account});
+      let paid=await this.getIsSubscribe(login)
+      if (login==this.state.login)
+      { paid=true;}
       let out={
         'login': data[0],
         'avatar': "https://ipfs.infura.io/ipfs/"+getIpfsHashFromBytes32(data[1]),
         'status': data[2],
         'price':data[3],
-        'subscribers':data[4]
+        'subscribers':data[4],
+        'paid':paid
       }
       return out;
     } catch (error) {
@@ -225,9 +414,8 @@ class App extends Component {
     try {
       
       const count= await this.state.contract.methods.getCountSubscriptions().call({from:this.state.account});
-      console.log(count)
      let out=[];
-     for(let i=count-1 ;i>=0;i--){
+     for(let i=0 ;i<count;i++){
        let array=await this.state.contract.methods.getSubscriptions(i).call({from:this.state.account})
        let buf={
           login:array[0],
@@ -239,7 +427,6 @@ class App extends Component {
        }
        out.push(buf)
      }
-     console.log(out)
      return out;
     } catch (error) {
       console.log(error)
@@ -247,12 +434,12 @@ class App extends Component {
   }
 
  subscribe(login,value,count=1){
+   
   this.setState({ loading: true })
   this.state.contract.methods.subscribe(login,count).send({value:value, from: this.state.account }).on('transactionHash', (hash) => {
     this.setState({ loading: false })
  
 }).then((result) => {
-    console.log(result)
     window.location.reload();
   })
  }
@@ -326,6 +513,7 @@ class App extends Component {
       images: [],
       loading: true 
     }
+    this.postsHome=[];
     const windowInnerWidth = document.documentElement.clientWidth
     const windowInnerHeight = document.documentElement.clientHeight
     this.setState({windowInnerHeight,windowInnerWidth})
@@ -347,6 +535,8 @@ class App extends Component {
     this.getData=this.getData.bind(this)
     this.getPosts=this.getPosts.bind(this)
     this.getSubscriptions=this.getSubscriptions.bind(this)
+    this.createGet10TopPopularAccount=this.createGet10TopPopularAccount.bind(this)
+    this.createGet10NewPosts=this.createGet10NewPosts.bind(this)
   }
   
   render() {
@@ -414,13 +604,14 @@ class App extends Component {
           }}></Route>
           <Route path="/home" render={() =>{
            return( <Home 
+            get10NewPost={this.createGet10NewPosts()}
     
            ></Home>)
           }}></Route>
           
           <Route path="/Popular" render={() =>{
            return( <Popular 
-            
+            get10TopPopularAccount={this.createGet10TopPopularAccount()}
            ></Popular>)
           }}></Route>
            <Route path="/Profile" render={() =>{
