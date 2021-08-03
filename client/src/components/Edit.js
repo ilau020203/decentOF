@@ -7,8 +7,8 @@ const Edit =props=>{
 
   let Status,Login,Price;
     return (     
-      <div className={s.main}>
-      <div className={s.form_signin}>
+   
+      <div className=" container justify-content-center  col-lg-6" align="center">
      <h1 className="h3   mb-3 fw-normal">Editor your profile</h1>
      <div className="align-self-start row">
      <form className="col" onSubmit={(event) => {
@@ -19,10 +19,10 @@ const Edit =props=>{
     
      <img className={s.image} src = {props.avatar} width="100%"></img>
      <div className="row p-1 ps-0 " >
-     <div className={"input-group mb-3 col"+s.inputFile}>
+     <div className={"input-group mb-3 col "+s.inputFile}>
      <input type="file" className="form-control" size="40" onChange={props.captureFile}></input>
      </div>
-     <button className={"w-100 btn btn-sm btn-primary col mb-3 pb-1"+s.button}  type="submit">save</button>
+     <button className={"w-100 btn btn-sm btn-primary col mb-3 pb-1 "+s.button}  type="submit">save</button>
      </div>
    </form>
 
@@ -87,7 +87,7 @@ const Edit =props=>{
    </div>
 
    
-   </div>
+ 
   
   
 
