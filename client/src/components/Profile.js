@@ -14,36 +14,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
   const [posts,setPosts]= useState( [])
   const [updatePost,setUpdatePost]=useState(true)
   const [hasMoretPosts,setHasMorePosts]=useState(true)
-  // const getPosts=null
-
-  // async function getMorePost(){
-  //   let count= await props.getMyCountPosts();
-  //   let i =count;
-  //    console.log("aaaa")
-  //   return  function (){
-  //      console.log("dfsga")
-  //     if(!!i){
-
-  //      posts.push( props.getMyPostsById(--i))
-  //      setPosts(posts)
-      
-
-  //     }else{
-  //       setHasMorePosts(false)
-  //     }
-  //   };
-
-    
-  // }
-
-  // useEffect(()=>{
-  //    async function getMyPosts() {
-  //        const getPosts = await getMorePost();
-         
-  //    }
-  //    getMyPosts();
-  //    console.log(getPosts);
-  // }, [updatePost])
+  
+ 
   useEffect(() => {
     
     async function getMyPosts() {
@@ -109,7 +81,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
            subscribers={props.subscribers}
            price={props.price}
            >
-             
            </MyProfile>
          
           <NewPost
@@ -120,21 +91,6 @@ import InfiniteScroll from "react-infinite-scroll-component";
           >
            </NewPost>
 
-
-{/* 
-           <InfiniteScroll
-          dataLength={posts.length}
-          next={getPosts}
-          hasMore={hasMoretPosts}
-          pullDownToRefreshThreshold={50}
-          loader={<h4>Loading...</h4>}
-          
-          endMessage={
-            <p style={{ textAlign: "center" }}>
-              <b>Yay! You have seen it all</b>
-            </p>
-          }
-        > */}
           { 
             posts.map(post=>{
               
@@ -154,17 +110,9 @@ import InfiniteScroll from "react-infinite-scroll-component";
               )
             })
            }
-           {/* </InfiniteScroll> */}
-          
-         
-         
-         
-    
-    </div>
-   
-          
 
-     
+    </div>
+ 
     );
   
 }

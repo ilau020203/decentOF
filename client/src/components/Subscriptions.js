@@ -10,10 +10,8 @@ const  Subscriptions=props=>{
 
   useEffect(() => {
     async function getSubscriptions(){
-      console.log(props.getSubscriptions)
       let buffer= await props.getSubscriptions()
       setSubscriptions(buffer)
-      console.log("subscriptions",buffer)
     }
     getSubscriptions()
     
@@ -30,7 +28,6 @@ const  Subscriptions=props=>{
           {subscriptions.map((subscription)=>{
 
             return(
-              
               <Subscription
               login={subscription.login}
               avatar={subscription.avatar }

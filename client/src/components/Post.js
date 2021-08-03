@@ -65,7 +65,7 @@ class Post extends Component {
       showNumOfRemainingPhotos: true
     }
     this.setState({ setting })
-
+    
   }
 
 
@@ -83,12 +83,12 @@ class Post extends Component {
               <img align="left" width="40" src={this.props.avatar} className={" d-block " + s.uiW40 + " row rounded-circle ps-1"} alt=""></img>
               <div align="left" className="media-body ms-2 ps-4  ">
                 {this.props.login}
-                <div align="left" className="text-muted small">{this.props.date}</div>
+                <div align="left" className="text-muted small">{(new Date(this.props.date)).toUTCString()}</div>
               </div>
 
             </div>
 
-            <p className={s.description}>
+            <p className="my-2" className={s.description}>
               {this.props.description}
             </p>
 

@@ -19,8 +19,6 @@ import { Redirect} from "react-router-dom";
   const [data,setData]=useState(null)
  
   const { match, location, history } = props.routeProps;
-  
-  console.log(location.pathname)
   const login = matchPath(location.pathname, {
     path: "/users/:login",
     exact: true,
@@ -28,45 +26,14 @@ import { Redirect} from "react-router-dom";
   }).params.login;
   
   
-  // const getPosts=null
 
-  // async function getMorePost(){
-  //   let count= await props.getMyCountPosts();
-  //   let i =count;
-  //    console.log("aaaa")
-  //   return  function (){
-  //      console.log("dfsga")
-  //     if(!!i){
-
-  //      posts.push( props.getMyPostsById(--i))
-  //      setPosts(posts)
-      
-
-  //     }else{
-  //       setHasMorePosts(false)
-  //     }
-  //   };
-
-    
-  // }
-
-  // useEffect(()=>{
-  //    async function getMyPosts() {
-  //        const getPosts = await getMorePost();
-         
-  //    }
-  //    getMyPosts();
-  //    console.log(getPosts);
-  // }, [updatePost])
   useEffect(() => {
     async function getPosts() {
-      console.log(login)
+
       const posts =await props.getPosts(login);
       setPosts(posts);
-      console.log("getPosts")
    }
    if(isSubscribe){
-      console.log("this")
       getPosts();
     }
     return () => {
@@ -76,25 +43,19 @@ import { Redirect} from "react-router-dom";
   useEffect(() => {
 
     async function getData(){
-      console.log(login)
       const data = await props.getData(login);
-      
       setData(data);
-      console.log(data)
-      console.log("getData")
-      
     }
 
     async function getIsSubscribe(){
-      console.log(login)
+
       const isSubscribe = await props.getIsSubscribe(login)
       setIsSubscribe(isSubscribe);
-      console.log(isSubscribe)
+
     }
      getData()
      getIsSubscribe()
-     console.log("this__")
-     console.log(isSubscribe)
+  
      
   
     return () => {
@@ -107,7 +68,6 @@ import { Redirect} from "react-router-dom";
     setUpdatePost(false)
     }
     else{ setUpdatePost(true)}
-    console.log('update')
   }
   update=update.bind(this)
   // holds the timer for setTimeout and clearInterval
@@ -144,7 +104,6 @@ import { Redirect} from "react-router-dom";
     clearInterval(movement_timer);
     movement_timer = setTimeout(test_dimensions, RESET_TIMEOUT);
   });
-  console.log(data)
    return (
           <div ref={targetRef } className=" container justify-content-center  col-lg-6" align="center">
            { data!=null
@@ -184,23 +143,7 @@ import { Redirect} from "react-router-dom";
           ?<div>
             <br></br>
             for see post need subscribe
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
-            <br></br>
+            
           </div>
           :<div>{
             posts.map(post=>{
