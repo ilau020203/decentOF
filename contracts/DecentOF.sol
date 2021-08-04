@@ -252,9 +252,7 @@ contract DecentOF{
         bool
         )
     {
-        string memory login;
-       bytes32 avatarHash;
-        string memory status;
+       
         uint256  id=findIdByAddress();
         require(_index<accounts[id].countsSubscription,
         "id subscription bigger than count subscription");
@@ -365,7 +363,7 @@ contract DecentOF{
                 j++;
             }
         }
-       assert(true,"bad _number");
+       revert("bad _number");
     }
     function getSubscriptionCountPostByIdUser(uint64 _idUser)
     public _isRegistrated 
