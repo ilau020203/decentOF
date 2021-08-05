@@ -29,12 +29,12 @@ const Registration =props=>{
         
         <label htmlFor="avatar" className="form-label">Avatar Image</label>
         <div className="input-group mb-3">
-        <input type="file" className="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" onChange={this.props.captureFile}></input>
+        <input type="file"   className="form-control" id="inputGroupFile03" aria-describedby="inputGroupFileAddon03" aria-label="Upload" onChange={props.captureFile}></input>
         </div>
           <label htmlFor="avatar" className="form-label">Price your subscribe</label>
         <div className="input-group mb-3">
          <span className="input-group-text">eth</span>
-        <input type="number" className="form-control" ref={(input) => { Price = input }}  aria-label="Amount (to the nearest eth)"></input>
+        <input type="number"  step="any" className="form-control" ref={(input) => { Price = input }}  aria-label="Amount (to the nearest eth)"></input>
         </div>
         <div className="input-group mb-3">
         <span className="input-group-text" id="inputGroup-sizing-default">Status</span>

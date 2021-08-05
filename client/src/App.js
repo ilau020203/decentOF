@@ -44,7 +44,7 @@ class App extends Component {
       const deployedNetwork = DecentOF.networks[networkId];
       const instance = new web3.eth.Contract(
         DecentOF.abi,
-        deployedNetwork && deployedNetwork.address,
+        '0x1972E32bb814b694651F077685f46699B6Db323d'
       );
      
       // Set web3, accounts, and contract to the state, and then proceed with an
