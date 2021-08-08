@@ -281,7 +281,7 @@ contract DecentOF{
     string memory
     )
     {
-        require(getCountAccountBySubcribe( _subscribe)>_id,"dont exist usert");
+        require(getCountAccountBySubcribe( _subscribe)>=_id,"dont exist usert");
         uint256 j=0;
        
         for(uint256 i = 0 ;i<accountsCount;i++){

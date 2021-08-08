@@ -334,12 +334,15 @@ class App extends Component {
       }
       
       while(count>=i*10){
-         let count= await this.state.contract.methods.getCountAccountBySubcribe(Math.ceil(Math.exp(++subscribers))).call({from:this.state.account});
+         let count= await this.state.contract.methods.getCountAccountBySubcribe(subscribers?Math.ceil(Math.exp(++subscribers)):0).call({from:this.state.account});
       }
       for(let i = count-1;i>=0;i--){
-        let login=await this.state.contract.methods.getLoginFilterBySubcribe(i,Math.ceil(Math.exp(subscribers))).call({from:this.state.account});
+        let login=await this.state.contract.methods.getLoginFilterBySubcribe(i,subscribers?Math.ceil(Math.exp(++subscribers)):0).call({from:this.state.account});
         out.push(await this.getData(login))
       }
+      out.sort((a,b)=>{
+        return (b.subscribers-a.subscribers)
+      })
       return out;
 
     }
@@ -440,27 +443,30 @@ class App extends Component {
     this.setState({ loading: false })
  
 }).then((result) => {
-    window.location.reload();
+    // window.location.reload();
   })
  }
   setLogin(login){
     this.setState({ loading: true })
       this.state.contract.methods.setLogin(login).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      window.location.reload();})
+      // window.location.reload();
+    })
   }
   setStatus(status){
     this.setState({ loading: true })
       this.state.contract.methods.setStatus(status).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      window.location.reload();})
+      // window.location.reload();
+    })
   }
 
   setPrice(price){
     this.setState({ loading: true })
       this.state.contract.methods.setPriceSubcribe(this.state.web3.utils.toWei(price, 'ether')) .send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      window.location.reload();})
+      // window.location.reload();
+    })
   }
   setAvatarHash(){
      console.log("Submitting file to ipfs...")
@@ -474,7 +480,7 @@ class App extends Component {
       this.setState({ loading: true })
       this.state.contract.methods.setAvatarHash(getBytes32FromIpfsHash(result[0].hash)).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      window.location.reload();
+      // window.location.reload();
       })
     })
   }
@@ -500,8 +506,8 @@ class App extends Component {
       this.setState({ loading: true })
       this.state.contract.methods.registration(Login,getBytes32FromIpfsHash(result[0].hash), Status,this.state.web3.utils.toWei(Price,'ether')).send({ from: this.state.account }).on('transactionHash', (hash) => {
         this.setState({ loading: false })
-      window.location.reload();
-      })
+        // window.location.replace('/');
+      }).then(()=>{ window.location.replace('/');})
     })
   }
   constructor(props) {
